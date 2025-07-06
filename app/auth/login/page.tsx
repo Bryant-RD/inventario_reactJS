@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Package, AlertCircle, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { UserRepository } from "@/lib/repositories"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -23,12 +24,6 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
-  // Mock users database (in a real app, this would be handled by your backend)
-  const mockUsers = [
-    { id: 1, email: "admin@inventory.com", password: "admin123", name: "Admin User" },
-    { id: 2, email: "user@inventory.com", password: "user123", name: "Regular User" },
-  ]
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -37,20 +32,8 @@ export default function LoginPage() {
   }
 
   const validateForm = () => {
-    if (!formData.email) {
-      setError("Email is required")
-      return false
-    }
-    if (!formData.email.includes("@")) {
-      setError("Please enter a valid email address")
-      return false
-    }
-    if (!formData.password) {
-      setError("Password is required")
-      return false
-    }
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long")
+    if (!formData.email || !formData.password) {
+      setError("Email and password are required")
       return false
     }
     return true
@@ -63,47 +46,33 @@ export default function LoginPage() {
 
     setIsLoading(true)
     setError("")
+    setSuccess("")
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const result = await UserRepository.login(formData)
 
-    // Check if user exists in mock database
-    const user = mockUsers.find((u) => u.email === formData.email && u.password === formData.password)
-
-    if (user) {
-      // Store user session (in a real app, use proper session management)
-      localStorage.setItem("user", JSON.stringify(user))
+    if (result.success) {
       setSuccess("Login successful! Redirecting...")
 
-      // Redirect to dashboard after short delay
       setTimeout(() => {
         router.push("/")
       }, 1500)
     } else {
-      setError("Invalid email or password. Please try again.")
+      setError(result.message)
     }
 
     setIsLoading(false)
   }
 
-  const handleDemoLogin = async () => {
+  const handleDemoLogin = () => {
     setFormData({
       email: "admin@inventory.com",
       password: "admin123",
     })
-
-    setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    const user = mockUsers[0]
-    localStorage.setItem("user", JSON.stringify(user))
-    setSuccess("Demo login successful! Redirecting...")
-
-    setTimeout(() => {
-      router.push("/")
-    }, 1500)
-
-    setIsLoading(false)
+    // The form will be submitted automatically by the user clicking the main button
+    // or we can trigger it programmatically if needed.
+    // For a better UX, we'll just pre-fill and let them click "Sign In".
+    setSuccess("Demo credentials filled. Click 'Sign In' to continue.")
+    setError("")
   }
 
   return (
