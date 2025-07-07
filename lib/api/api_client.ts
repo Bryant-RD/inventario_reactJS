@@ -1,6 +1,6 @@
 import { AuthResponse } from "@/app/interfaces/user.interface"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+const API_BASE_URL = "/api"
 
 interface ApiResponse<T> {
   success: boolean
@@ -30,6 +30,8 @@ async function request<T>(
       headers,
       body: body ? JSON.stringify(body) : null,
     })
+
+    console.log(body);
 
     // Handle cases where the response has no content (e.g., DELETE 204)
     if (response.status === 204) {
@@ -72,4 +74,3 @@ export const ApiClient = {
   patch: <T>(endpoint: string, body: unknown, token: string) => request<T>(endpoint, "PATCH", token, body),
   delete: <T>(endpoint: string, token: string) => request<T>(endpoint, "DELETE", token),
 }
-

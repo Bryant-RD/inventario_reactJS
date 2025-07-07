@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Package, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { UserRepository } from "@/lib/repositories"
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -21,6 +22,7 @@ export default function SignUpPage() {
     password: "",
     confirmPassword: "",
     company: "",
+    username: "",
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -74,48 +76,32 @@ export default function SignUpPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
 
+
     if (!validateForm()) return
 
     setIsLoading(true)
     setError("")
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    // Excluimos confirmPassword ya que no se envía al backend
+    const { confirmPassword, ...registrationData } = formData
 
     try {
-      // Check if email already exists (mock check)
-      const existingUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]")
-      const emailExists = existingUsers.some((user: any) => user.email === formData.email)
+      // Llamamos al método del repositorio para registrar al usuario
+      const result = await UserRepository.register(registrationData)
 
-      if (emailExists) {
-        setError("An account with this email already exists")
-        setIsLoading(false)
-        return
+      if (result.success) {
+        setSuccess("Account created successfully! Redirecting to login...")
+
+        // Redirigir a la página de login tras un breve retraso
+        setTimeout(() => {
+          router.push("/auth/login")
+        }, 2000)
+      } else {
+        // Mostramos el mensaje de error que viene de la API
+        setError(result.message)
       }
-
-      // Create new user
-      const newUser = {
-        id: Date.now(),
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        company: formData.company,
-        createdAt: new Date().toISOString(),
-      }
-
-      // Save to localStorage (in a real app, this would be sent to your backend)
-      existingUsers.push(newUser)
-      localStorage.setItem("registeredUsers", JSON.stringify(existingUsers))
-
-      setSuccess("Account created successfully! Redirecting to login...")
-
-      // Redirect to login page after short delay
-      setTimeout(() => {
-        router.push("/auth/login")
-      }, 2000)
-    } catch (err) {
-      setError("Something went wrong. Please try again.")
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Please try again.")
     }
 
     setIsLoading(false)
@@ -177,6 +163,21 @@ export default function SignUpPage() {
                     disabled={isLoading}
                   />
                 </div>
+              </div>
+              
+
+              {/* Email Field */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  placeholder="johnD0880"
+                  disabled={isLoading}
+                />
               </div>
 
               {/* Email Field */}
