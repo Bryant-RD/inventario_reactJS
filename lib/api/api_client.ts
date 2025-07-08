@@ -8,6 +8,8 @@ interface ApiResponse<T> {
   user?: AuthResponse["user"]
 }
 
+const API_BASE_URL = "/api"
+
 async function request<T>(
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
@@ -23,13 +25,12 @@ async function request<T>(
   }
 
   try {
-    const response = await fetch(`http://localhost:3000${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : null,
     })
 
-    console.log(response);
 
     // Handle cases where the response has no content (e.g., DELETE 204)
     if (response.status === 204) {

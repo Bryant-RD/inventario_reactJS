@@ -345,7 +345,7 @@ export default function ProductsPage() {
                     <SelectContent>
                       {suppliers.map((supplier) => (
                         <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                          {supplier.name}
+                          {supplier.nombre}
                         </SelectItem>
                       ))}
                     </SelectContent>
