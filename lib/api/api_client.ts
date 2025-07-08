@@ -1,7 +1,5 @@
 import { AuthResponse } from "@/app/interfaces/user.interface"
 
-const API_BASE_URL = "/api"
-
 interface ApiResponse<T> {
   success: boolean
   message: string
@@ -25,13 +23,13 @@ async function request<T>(
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`http://localhost:3000${endpoint}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : null,
     })
 
-    console.log(body);
+    console.log(response);
 
     // Handle cases where the response has no content (e.g., DELETE 204)
     if (response.status === 204) {

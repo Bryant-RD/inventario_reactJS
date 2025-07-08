@@ -4,7 +4,7 @@ test.describe('Authentication Flow', () => {
   test('should allow a user to sign up successfully and redirect to login', async ({ page }) => {
     // Mockeamos la respuesta de la API para un registro exitoso.
     // `next.fetch` intercepta la llamada a fetch que hace tu aplicación.
-    await page.route('**/api/auth/register', async route => {
+    await page.route('**/auth/register', async route => {
       await route.fulfill({
       body: JSON.stringify({
         success: true,
@@ -60,7 +60,7 @@ test.describe('Authentication Flow', () => {
 
   test('should show an API error message if registration fails', async ({ page }) => {
     // Mockeamos una respuesta de error de la API
-    await page.route('**/api/auth/register', async route => {
+    await page.route('**/auth/register', async route => {
       await route.fulfill({
       status: 400,
       body: JSON.stringify({

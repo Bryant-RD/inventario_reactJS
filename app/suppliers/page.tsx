@@ -25,12 +25,12 @@ import { SupplierProductsDialog } from "@/components/ui/supplier-products-dialog
 import { Product } from "../interfaces/products.interface"
 
 // Mock products data
-const mockProducts = [ // Add createdAt and updatedAt to mock products
-  { id: 1, name: "Wireless Headphones", stock: 5, minStock: 10, price: 99.99, supplierId: 1, category: "Electronics", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 2, name: "Smartphone Case", stock: 25, minStock: 15, price: 19.99, supplierId: 2, category: "Accessories", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 3, name: "USB Cable", stock: 3, minStock: 20, price: 12.99, supplierId: 1, category: "Cables", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 4, name: "Bluetooth Speaker", stock: 8, minStock: 12, price: 79.99, supplierId: 3, category: "Electronics", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 5, name: "Power Bank", stock: 15, minStock: 8, price: 39.99, supplierId: 2, category: "Electronics", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+const mockProducts: Product[] = [ // Add createdAt and updatedAt to mock products
+  { id: 1, nombre: "Wireless Headphones", cantidad: 5, cantidadMinima: 10, precio: 99.99, proveedorId: 1, categoria: "Electronics", fechaCreacion: new Date().toISOString(), fechaActualizacion: new Date().toISOString() },
+  { id: 2, nombre: "Smartphone Case", cantidad: 25, cantidadMinima: 15, precio: 19.99, proveedorId: 2, categoria: "Accessories", fechaCreacion: new Date().toISOString(), fechaActualizacion: new Date().toISOString() },
+  { id: 3, nombre: "USB Cable", cantidad: 3, cantidadMinima: 20, precio: 12.99, proveedorId: 1, categoria: "Cables", fechaCreacion: new Date().toISOString(), fechaActualizacion: new Date().toISOString() },
+  { id: 4, nombre: "Bluetooth Speaker", cantidad: 8, cantidadMinima: 12, precio: 79.99, proveedorId: 3, categoria: "Electronics", fechaCreacion: new Date().toISOString(), fechaActualizacion: new Date().toISOString() },
+  { id: 5, nombre: "Power Bank", cantidad: 15, cantidadMinima: 8, precio: 39.99, proveedorId: 2, categoria: "Electronics", fechaCreacion: new Date().toISOString(), fechaActualizacion: new Date().toISOString() },
 ] as Product[]
 
 // Mock data
@@ -255,7 +255,7 @@ export default function SuppliersPage() {
                     <CardDescription>
                       <Badge variant="outline" className="mt-2"> {/* Calculate productsCount dynamically */}
                         {
-                          mockProducts.filter((product) => product.supplierId === supplier.id).length
+                          mockProducts.filter((product) => product.proveedorId === supplier.id).length
                         }{" "}
                         products
                       </Badge>
@@ -346,7 +346,7 @@ export default function SuppliersPage() {
                       <TableCell>{supplier.phone || "N/A"}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {mockProducts.filter((product) => product.supplierId === supplier.id).length}{" "}
+                          {mockProducts.filter((product) => product.proveedorId === supplier.id).length}{" "}
                           products
                         </Badge></TableCell>
                       <TableCell>

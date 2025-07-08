@@ -15,10 +15,10 @@ interface SupplierProductsDialogProps {
 }
 
 export function SupplierProductsDialog({ isOpen, onOpenChange, supplier, products }: SupplierProductsDialogProps) {
-  const supplierProducts = products.filter((product) => product.supplierId === supplier?.id)
-  const totalValue = supplierProducts.reduce((sum, product) => sum + product.stock * product.price, 0)
-  const totalStock = supplierProducts.reduce((sum, product) => sum + product.stock, 0)
-  const lowStockProducts = supplierProducts.filter((product) => product.stock <= product.minStock)
+  const supplierProducts = products.filter((product) => product.proveedorId === supplier?.id)
+  const totalValue = supplierProducts.reduce((sum, product) => sum + product.cantidad * product.precio, 0)
+  const totalStock = supplierProducts.reduce((sum, product) => sum + product.cantidad, 0)
+  const lowStockProducts = supplierProducts.filter((product) => product.cantidad <= product.cantidadMinima)
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -76,15 +76,15 @@ export function SupplierProductsDialog({ isOpen, onOpenChange, supplier, product
               </TableHeader>
               <TableBody>
                 {supplierProducts.map((product) => {
-                  const isLowStock = product.stock <= product.minStock
-                  const productValue = product.stock * product.price
+                  const isLowStock = product.cantidad <= product.cantidadMinima
+                  const productValue = product.cantidad * product.precio
                   return (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>{product.category}</TableCell>
-                      <TableCell>{product.stock}</TableCell>
-                      <TableCell>{product.minStock}</TableCell>
-                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell className="font-medium">{product.nombre}</TableCell>
+                      <TableCell>{product.categoria}</TableCell>
+                      <TableCell>{product.cantidad}</TableCell>
+                      <TableCell>{product.cantidadMinima}</TableCell>
+                      <TableCell>${product.precio.toFixed(2)}</TableCell>
                       <TableCell>${productValue.toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge variant={isLowStock ? "destructive" : "secondary"}>

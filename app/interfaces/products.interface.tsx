@@ -1,22 +1,24 @@
 export interface Product {
+  
   id: number
-  name: string
-  category: string
-  stock: number
-  minStock: number
-  price: number
-  supplierId: number
-  createdAt: string
-  updatedAt: string
+  nombre: string
+  categoria: string
+  cantidad: number
+  cantidadMinima: number
+  precio: number
+  proveedorId: number
+  fechaCreacion: string
+  fechaActualizacion: string
 }
 
 export interface CreateProductData {
-  name: string
-  category: string
-  stock: number
-  minStock: number
-  price: number
-  supplierId: number
+  nombre: string
+  descripcion: string
+  categoria: string
+  precio: number
+  cantidad: number
+  cantidadMinima: number
+  proveedorId: number
 }
 
 export type UpdateProductData = Partial<CreateProductData>

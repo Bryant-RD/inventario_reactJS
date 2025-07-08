@@ -20,9 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Edit, Trash2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Product } from "../interfaces/products.interface"
-import { Supplier } from "../interfaces/suppliers.interface"
-import { ApiProductos } from "@/lib/api"
-import { ApiProveedores } from "@/lib/api"
+import { UpdateProductData } from "../interfaces/products.interface"
+import { ApiProductos, ApiProveedores } from "@/lib/api"
 import { getToken } from "../utils/auth"
 
 
@@ -41,7 +40,7 @@ export default function ProductsPage() {
     supplierId: "",
     category: "",
   })
-  const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [suppliers, setSuppliers] = useState<any[]>([])
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   
   // ✅ Traer productos desde la API
@@ -51,8 +50,10 @@ export default function ProductsPage() {
       
       try {
         const res = await ApiProductos.getAllProducts(token)
+        console.log(res)
         if (res.products) {
           setProducts(res.products)
+          console.log(res.products)
         }
       } catch (error) { // TODO: Handle error in UI
         console.error("Error fetching products:", error) // TODO: Handle error in UI
@@ -65,6 +66,7 @@ export default function ProductsPage() {
         const res = await ApiProveedores.getAllSuppliers(token)
         if (res.suppliers) {
           setSuppliers(res.suppliers)
+          console.log(res.suppliers)
         }
       } catch (error) {
         console.error("Error fetching suppliers:", error)
@@ -79,12 +81,13 @@ export default function ProductsPage() {
     if (newProduct.name && newProduct.stock && newProduct.price && token) {
       try { // TODO: Add validation for price
         const created = await ApiProductos.createProduct(token, {
-          name: newProduct.name,
-          stock: Number.parseInt(newProduct.stock),
-          minStock: Number.parseInt(newProduct.minStock) || 5,
-          price: Number.parseFloat(newProduct.price), // TODO: Add validation for price
-          supplierId: Number.parseInt(newProduct.supplierId) || 1,
-          category: newProduct.category || "General",
+          nombre: newProduct.name,
+          cantidad: Number.parseInt(newProduct.stock),
+          cantidadMinima: Number.parseInt(newProduct.minStock) || 5,
+          precio: Number.parseFloat(newProduct.price),
+          proveedorId: Number.parseInt(newProduct.supplierId) || 1,
+          categoria: newProduct.category || "General",
+          descripcion: "FALTA ESTE CAMPO"
         })
         if (created.product) {
           setProducts([...products, created.product])
@@ -122,12 +125,12 @@ export default function ProductsPage() {
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product)
     setNewProduct({
-      name: product.name,
-      stock: product.stock.toString(),
-      minStock: product.minStock.toString(),
-      price: product.price.toString(),
-      supplierId: product.supplierId.toString(),
-      category: product.category,
+      name: product.nombre,
+      stock: product.cantidad.toString(),
+      minStock: product.cantidadMinima.toString(),
+      price: product.precio.toString(),
+      supplierId: product.proveedorId.toString(),
+      category: product.categoria,
     })
     setIsEditDialogOpen(true)
   }
@@ -135,14 +138,15 @@ export default function ProductsPage() {
   const handleUpdateProduct = async () => {
     if (editingProduct && newProduct.name && newProduct.stock && newProduct.price && token) {
       try { // TODO: Add validation for price
+
         const updated = await ApiProductos.updateProduct(token, editingProduct.id, {
-          name: newProduct.name,
-          stock: Number.parseInt(newProduct.stock),
-          minStock: Number.parseInt(newProduct.minStock) || 5,
-          price: Number.parseFloat(newProduct.price),
-          supplierId: Number.parseInt(newProduct.supplierId) || 1,
-          category: newProduct.category || "General",
-        }) // TODO: Add validation for price
+          nombre: newProduct.name,
+          cantidad: Number.parseInt(newProduct.stock),
+          cantidadMinima: Number.parseInt(newProduct.minStock) || 5,
+          precio: Number.parseFloat(newProduct.price),
+          proveedorId: Number.parseInt(newProduct.supplierId) || 1,
+          categoria: newProduct.category || "General",
+        } as UpdateProductData) // TODO: Add validation for price
         if (updated.product) {
           setProducts(products.map((p) => (p.id === editingProduct.id ? updated.product : p)) as Product[])
         }
@@ -157,8 +161,8 @@ export default function ProductsPage() {
 
   const filteredProducts = products.filter(
     (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase()),
+      product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.categoria.toLowerCase().includes(searchTerm.toLowerCase()),
   )
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -253,7 +257,7 @@ export default function ProductsPage() {
                     <SelectContent>
                       {suppliers.map((supplier) => (
                         <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                          {supplier.name}
+                          {supplier.nombre}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -405,28 +409,28 @@ export default function ProductsPage() {
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => {
-                  const supplier = suppliers.find((s) => s.id === product.supplierId)
-                  const isLowStock = product.stock <= product.minStock
+                  const supplier = suppliers.find((s) => s.id === product.proveedorId)
+                  const isLowStock = product.cantidad <= product.cantidadMinima
                   return (
                     <TableRow key={product.id}>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>{product.category}</TableCell>
+                      <TableCell className="font-medium">{product.nombre}</TableCell>
+                      <TableCell>{product.categoria}</TableCell>
                       <TableCell>
                         <Input
                           type="number"
-                          value={product.stock}
+                          value={product.cantidad}
                           onChange={(e) => handleUpdateStock(product.id, Number(e.target.value))}
                           className="w-20"
                         />
                       </TableCell>
-                      <TableCell>{product.minStock}</TableCell>
-                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>{product.cantidadMinima}</TableCell>
+                      <TableCell>${product.precio.toString(2)}</TableCell>
                       <TableCell>
                         <Badge variant={isLowStock ? "destructive" : "secondary"}>
                           {isLowStock ? "Low Stock" : "In Stock"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{supplier?.name}</TableCell>
+                      <TableCell>{supplier?.nombre}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
