@@ -83,6 +83,7 @@ export default function SignUpPage() {
     setError("")
 
     // Excluimos confirmPassword ya que no se envía al backend
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...registrationData } = formData
 
     try {
@@ -100,8 +101,12 @@ export default function SignUpPage() {
         // Mostramos el mensaje de error que viene de la API
         setError(result.message)
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.")
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Something went wrong. Please try again.")
+      } else {
+        setError("An unknown error occurred. Please try again.")
+      }
     }
 
     setIsLoading(false)
@@ -168,7 +173,7 @@ export default function SignUpPage() {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Username</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   name="username"

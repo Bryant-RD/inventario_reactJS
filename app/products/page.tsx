@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,74 +20,106 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Edit, Trash2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Product } from "../interfaces/products.interface"
+import { Supplier } from "../interfaces/suppliers.interface"
+import { ApiProductos } from "@/lib/api"
+import { ApiProveedores } from "@/lib/api"
+import { getToken } from "../utils/auth"
 
-// Mock data
-const initialProducts = [
-  { id: 1, name: "Wireless Headphones", stock: 5, minStock: 10, price: 99.99, supplierId: 1, category: "Electronics" },
-  { id: 2, name: "Smartphone Case", stock: 25, minStock: 15, price: 19.99, supplierId: 2, category: "Accessories" },
-  { id: 3, name: "USB Cable", stock: 3, minStock: 20, price: 12.99, supplierId: 1, category: "Cables" },
-  { id: 4, name: "Bluetooth Speaker", stock: 8, minStock: 12, price: 79.99, supplierId: 3, category: "Electronics" },
-  { id: 5, name: "Power Bank", stock: 15, minStock: 8, price: 39.99, supplierId: 2, category: "Electronics" },
-]
 
-const suppliers = [
-  { id: 1, name: "TechCorp Solutions" },
-  { id: 2, name: "Global Electronics" },
-  { id: 3, name: "Audio Specialists" },
-]
+let token = getToken()
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState(initialProducts)
+  const [products, setProducts] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [newProduct, setNewProduct] = useState({
     name: "",
     stock: "",
-    minStock: "",
+    minStock: "5",
     price: "",
     supplierId: "",
     category: "",
   })
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
-  const handleAddProduct = () => {
-    if (newProduct.name && newProduct.stock && newProduct.price) {
-      const product = {
-        id: Date.now(),
-        name: newProduct.name,
-        stock: Number.parseInt(newProduct.stock),
-        minStock: Number.parseInt(newProduct.minStock) || 5,
-        price: Number.parseFloat(newProduct.price),
-        supplierId: Number.parseInt(newProduct.supplierId) || 1,
-        category: newProduct.category || "General",
+  
+  // ✅ Traer productos desde la API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!token) return
+      
+      try {
+        const res = await ApiProductos.getAllProducts(token)
+        if (res.products) {
+          setProducts(res.products)
+        }
+      } catch (error) { // TODO: Handle error in UI
+        console.error("Error fetching products:", error) // TODO: Handle error in UI
       }
-      setProducts([...products, product])
-      setNewProduct({ name: "", stock: "", minStock: "", price: "", supplierId: "", category: "" })
-      setIsAddDialogOpen(false)
+    }
+
+    const fetchSuppliers = async () => {
+      if (!token) return
+      try {
+        const res = await ApiProveedores.getAllSuppliers(token)
+        if (res.suppliers) {
+          setSuppliers(res.suppliers)
+        }
+      } catch (error) {
+        console.error("Error fetching suppliers:", error)
+      }
+    }
+
+    fetchProducts()
+    fetchSuppliers()
+  }, [token])
+
+  const handleAddProduct = async () => {
+    if (newProduct.name && newProduct.stock && newProduct.price && token) {
+      try { // TODO: Add validation for price
+        const created = await ApiProductos.createProduct(token, {
+          name: newProduct.name,
+          stock: Number.parseInt(newProduct.stock),
+          minStock: Number.parseInt(newProduct.minStock) || 5,
+          price: Number.parseFloat(newProduct.price), // TODO: Add validation for price
+          supplierId: Number.parseInt(newProduct.supplierId) || 1,
+          category: newProduct.category || "General",
+        })
+        if (created.product) {
+          setProducts([...products, created.product])
+        }
+        setNewProduct({ name: "", stock: "", minStock: "", price: "", supplierId: "", category: "" })
+        setIsAddDialogOpen(false) // TODO: Add success message
+      } catch (error) {
+        console.error("Error creating product:", error)
+      }
     }
   }
 
-  const handleUpdateStock = (productId : number, newStock: number) => {
-    setProducts(
-      products.map((product) =>
-        product.id === productId ? { ...product, stock: Number.parseInt(newStock.toString()) } : product,
-      ),
-    )
+  const handleUpdateStock = async (productId: number, newStock: number) => {
+    if (token) {
+      try {
+        await ApiProductos.updateStock(token, productId, newStock)
+        setProducts(products.map((p) => (p.id === productId ? { ...p, stock: newStock } : p)))
+      } catch (error) {
+        console.error("Error updating stock:", error) // TODO: Handle error in UI
+      }
+    }
   }
 
-  const handleDeleteProduct = (productId: number) => {
-    setProducts(products.filter((product) => product.id !== productId))
+  const handleDeleteProduct = async (productId: number) => {
+    if (token) {
+      try {
+        await ApiProductos.deleteProduct(token, productId)
+        setProducts(products.filter((p) => p.id !== productId))
+      } catch (error) { // TODO: Handle error in UI
+        console.error("Error deleting product:", error)
+      }
+    }
   }
 
-  const handleEditProduct = (product: any) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product)
     setNewProduct({
       name: product.name,
@@ -100,24 +132,34 @@ export default function ProductsPage() {
     setIsEditDialogOpen(true)
   }
 
-  const handleUpdateProduct = () => {
-    if (editingProduct && newProduct.name && newProduct.stock && newProduct.price) {
-      const updatedProduct = {
-        ...editingProduct,
-        name: newProduct.name,
-        stock: Number.parseInt(newProduct.stock),
-        minStock: Number.parseInt(newProduct.minStock) || 5,
-        price: Number.parseFloat(newProduct.price),
-        supplierId: Number.parseInt(newProduct.supplierId) || 1,
-        category: newProduct.category || "General",
+  const handleUpdateProduct = async () => {
+    if (editingProduct && newProduct.name && newProduct.stock && newProduct.price && token) {
+      try { // TODO: Add validation for price
+        const updated = await ApiProductos.updateProduct(token, editingProduct.id, {
+          name: newProduct.name,
+          stock: Number.parseInt(newProduct.stock),
+          minStock: Number.parseInt(newProduct.minStock) || 5,
+          price: Number.parseFloat(newProduct.price),
+          supplierId: Number.parseInt(newProduct.supplierId) || 1,
+          category: newProduct.category || "General",
+        }) // TODO: Add validation for price
+        if (updated.product) {
+          setProducts(products.map((p) => (p.id === editingProduct.id ? updated.product : p)) as Product[])
+        }
+        setNewProduct({ name: "", stock: "", minStock: "", price: "", supplierId: "", category: "" })
+        setEditingProduct(null)
+        setIsEditDialogOpen(false)
+      } catch (error) {
+        console.error("Error updating product:", error) // TODO: Handle error in UI
       }
-      setProducts(products.map((p) => (p.id === editingProduct.id ? updatedProduct : p)))
-      setNewProduct({ name: "", stock: "", minStock: "", price: "", supplierId: "", category: "" })
-      setEditingProduct(null)
-      setIsEditDialogOpen(false)
     }
   }
 
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
   return (
     <div className="min-h-screen bg-gray-50/50">
       <div className="container mx-auto p-6 space-y-6">

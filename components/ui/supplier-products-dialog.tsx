@@ -4,12 +4,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Supplier } from "@/app/interfaces/suppliers.interface"
+import { Product } from "@/app/interfaces/products.interface"
 
 interface SupplierProductsDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  supplier: any
-  products: any[]
+  supplier: Supplier | null
+  products: Product[]
 }
 
 export function SupplierProductsDialog({ isOpen, onOpenChange, supplier, products }: SupplierProductsDialogProps) {

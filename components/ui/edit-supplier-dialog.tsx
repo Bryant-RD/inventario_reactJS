@@ -12,13 +12,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Supplier, UpdateSupplierData } from "@/app/interfaces/suppliers.interface"
 
 interface EditSupplierDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  supplier: any
-  newSupplier: any
-  setNewSupplier: (supplier: any) => void
+  newSupplier: UpdateSupplierData
+  setNewSupplier: (supplier: UpdateSupplierData) => void
   onUpdate: () => void
   onCancel: () => void
 }
@@ -26,7 +26,6 @@ interface EditSupplierDialogProps {
 export function EditSupplierDialog({
   isOpen,
   onOpenChange,
-  supplier,
   newSupplier,
   setNewSupplier,
   onUpdate,

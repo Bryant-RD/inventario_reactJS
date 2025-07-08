@@ -20,42 +20,47 @@ import { Textarea } from "@/components/ui/textarea"
 import { Plus, Search, Edit, Trash2, ArrowLeft, Mail, Phone } from "lucide-react"
 import Link from "next/link"
 import { EditSupplierDialog } from "@/components/ui/edit-supplier-dialog"
+import { Supplier, UpdateSupplierData } from "@/app/interfaces/suppliers.interface"
 import { SupplierProductsDialog } from "@/components/ui/supplier-products-dialog"
+import { Product } from "../interfaces/products.interface"
 
 // Mock products data
-const mockProducts = [
-  { id: 1, name: "Wireless Headphones", stock: 5, minStock: 10, price: 99.99, supplierId: 1, category: "Electronics" },
-  { id: 2, name: "Smartphone Case", stock: 25, minStock: 15, price: 19.99, supplierId: 2, category: "Accessories" },
-  { id: 3, name: "USB Cable", stock: 3, minStock: 20, price: 12.99, supplierId: 1, category: "Cables" },
-  { id: 4, name: "Bluetooth Speaker", stock: 8, minStock: 12, price: 79.99, supplierId: 3, category: "Electronics" },
-  { id: 5, name: "Power Bank", stock: 15, minStock: 8, price: 39.99, supplierId: 2, category: "Electronics" },
-]
+const mockProducts = [ // Add createdAt and updatedAt to mock products
+  { id: 1, name: "Wireless Headphones", stock: 5, minStock: 10, price: 99.99, supplierId: 1, category: "Electronics", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 2, name: "Smartphone Case", stock: 25, minStock: 15, price: 19.99, supplierId: 2, category: "Accessories", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 3, name: "USB Cable", stock: 3, minStock: 20, price: 12.99, supplierId: 1, category: "Cables", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 4, name: "Bluetooth Speaker", stock: 8, minStock: 12, price: 79.99, supplierId: 3, category: "Electronics", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 5, name: "Power Bank", stock: 15, minStock: 8, price: 39.99, supplierId: 2, category: "Electronics", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+] as Product[]
 
 // Mock data
 const initialSuppliers = [
   {
     id: 1,
     name: "TechCorp Solutions",
-    contact: "contact@techcorp.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Tech Street, Silicon Valley, CA 94000",
-    productsCount: 2,
+    contact: "contact@techcorp.com", // This is email
+    phone: "+1 (555) 123-4567", // This is phone
+    address: "123 Tech Street, Silicon Valley, CA 94000", // This is address
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: 2,
     name: "Global Electronics",
-    contact: "sales@globalelec.com",
-    phone: "+1 (555) 987-6543",
-    address: "456 Electronics Ave, Austin, TX 78701",
-    productsCount: 2,
+    contact: "sales@globalelec.com", // This is email
+    phone: "+1 (555) 987-6543", // This is phone
+    address: "456 Electronics Ave, Austin, TX 78701", // This is address
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: 3,
     name: "Audio Specialists",
-    contact: "info@audiospec.com",
-    phone: "+1 (555) 456-7890",
-    address: "789 Sound Blvd, Nashville, TN 37201",
-    productsCount: 1,
+    contact: "info@audiospec.com", // This is email
+    phone: "+1 (555) 456-7890", // This is phone
+    address: "789 Sound Blvd, Nashville, TN 37201", // This is address
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
 ]
 
@@ -63,7 +68,7 @@ export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState(initialSuppliers)
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [newSupplier, setNewSupplier] = useState({
+  const [newSupplier, setNewSupplier] = useState<UpdateSupplierData>({
     name: "",
     contact: "",
     phone: "",
@@ -71,7 +76,7 @@ export default function SuppliersPage() {
   })
 
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false) // State for the edit dialog
   const [viewingSupplierProducts, setViewingSupplierProducts] = useState<Supplier | null>(null)
   const [isProductsDialogOpen, setIsProductsDialogOpen] = useState(false)
 
@@ -89,9 +94,10 @@ export default function SuppliersPage() {
         contact: newSupplier.contact,
         phone: newSupplier.phone || "",
         address: newSupplier.address || "",
-        productsCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       }
-      setSuppliers([...suppliers, supplier])
+ setSuppliers([...suppliers, supplier])
       setNewSupplier({ name: "", contact: "", phone: "", address: "" })
       setIsAddDialogOpen(false)
     }
@@ -100,15 +106,7 @@ export default function SuppliersPage() {
   const handleDeleteSupplier = (supplierId: number) => {
     setSuppliers(suppliers.filter((supplier) => supplier.id !== supplierId))
   }
-
-  type Supplier = {
-    id: number
-    name: string
-    contact: string
-    phone: string
-    address: string
-    productsCount: number
-  }
+  
 
   const handleEditSupplier = (supplier: Supplier) => {
     setEditingSupplier(supplier)
@@ -129,6 +127,8 @@ export default function SuppliersPage() {
         contact: newSupplier.contact,
         phone: newSupplier.phone || "",
         address: newSupplier.address || "",
+        createdAt: editingSupplier.createdAt, // Keep original createdAt
+        updatedAt: new Date().toISOString(), // Update updatedAt
       }
       setSuppliers(suppliers.map((s) => (s.id === editingSupplier.id ? updatedSupplier : s)))
       setNewSupplier({ name: "", contact: "", phone: "", address: "" })
@@ -251,10 +251,13 @@ export default function SuppliersPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">{supplier.name}</CardTitle>
+                    <CardTitle className="text-lg">{supplier.name}</CardTitle>{" "}
                     <CardDescription>
-                      <Badge variant="outline" className="mt-2">
-                        {supplier.productsCount} products
+                      <Badge variant="outline" className="mt-2"> {/* Calculate productsCount dynamically */}
+                        {
+                          mockProducts.filter((product) => product.supplierId === supplier.id).length
+                        }{" "}
+                        products
                       </Badge>
                     </CardDescription>
                   </div>
@@ -335,26 +338,30 @@ export default function SuppliersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSuppliers.map((supplier) => (
-                  <TableRow key={supplier.id}>
-                    <TableCell className="font-medium">{supplier.name}</TableCell>
-                    <TableCell>{supplier.contact}</TableCell>
-                    <TableCell>{supplier.phone || "N/A"}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{supplier.productsCount} products</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEditSupplier(supplier)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteSupplier(supplier.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredSuppliers.map((supplier) => {
+                  return (
+                    <TableRow key={supplier.id}>
+                      <TableCell className="font-medium">{supplier.name}</TableCell>
+                      <TableCell>{supplier.contact}</TableCell>
+                      <TableCell>{supplier.phone || "N/A"}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {mockProducts.filter((product) => product.supplierId === supplier.id).length}{" "}
+                          products
+                        </Badge></TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => handleEditSupplier(supplier)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteSupplier(supplier.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </CardContent>
@@ -365,7 +372,6 @@ export default function SuppliersPage() {
       <EditSupplierDialog
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        supplier={editingSupplier}
         newSupplier={newSupplier}
         setNewSupplier={setNewSupplier}
         onUpdate={handleUpdateSupplier}

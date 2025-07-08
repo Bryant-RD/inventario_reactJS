@@ -10,9 +10,8 @@ export class ApiUsuarios {
 
   // Registro de usuario
   static async register(userData: CreateUserDTO): Promise<AuthResponse> {
-    let response = await ApiClient.post<AuthResponse>("/auth/register", userData);
-
-    return response;
+    const response = await ApiClient.post<AuthResponse>("/auth/register", userData)
+    return response
   }
 
   // Obtener perfil del usuario

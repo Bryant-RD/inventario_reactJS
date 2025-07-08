@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button"
 import { AlertTriangle, Package, Users, TrendingDown, TrendingUp, LogOut } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { AuthGuard } from "@/components/ui/auth-guard"
+import { AuthGuard, useAuth } from "./context/auth-context"
 
 // Mock data - in a real app, this would come from an API
 const mockProducts = [
@@ -26,22 +25,10 @@ const mockSuppliers = [
 ]
 
 function DashboardContent() {
-  const router = useRouter()
   const [products] = useState(mockProducts)
   const [suppliers] = useState(mockSuppliers)
-  const [user, setUser] = useState<any>(null)
-
-  useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      setUser(JSON.parse(userData))
-    }
-  }, [])
-
-  const handleLogout = () => {
-    localStorage.removeItem("user")
-    router.push("/auth/login")
-  }
+  // Get user and logout function from the Auth context
+  const { user, logout } = useAuth()
 
   const lowStockProducts = products.filter((product) => product.stock <= product.minStock)
   const totalValue = products.reduce((sum, product) => sum + product.stock * product.price, 0)
@@ -53,8 +40,8 @@ function DashboardContent() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Welcome back, {user?.firstName || user?.name || "User"}!
+            <h1 className="text-3xl font-bold tracking-tight"> 
+              Welcome back, {user?.firstName || "User"}!
             </h1>
             <p className="text-muted-foreground">Manage your stock and suppliers efficiently</p>
           </div>
@@ -70,7 +57,7 @@ function DashboardContent() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleLogout}
+              onClick={logout}
               className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               <LogOut className="h-4 w-4 mr-2" />
@@ -201,8 +188,6 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <AuthGuard>
-      <DashboardContent />
-    </AuthGuard>
+    <AuthGuard><DashboardContent /></AuthGuard>
   )
 }

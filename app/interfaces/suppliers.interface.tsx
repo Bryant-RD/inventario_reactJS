@@ -1,3 +1,5 @@
+import { Product } from "./products.interface"
+
 export interface Supplier {
   id: number
   name: string
@@ -15,7 +17,7 @@ export interface CreateSupplierData {
   address?: string
 }
 
-export interface UpdateSupplierData extends Partial<CreateSupplierData> {}
+export type UpdateSupplierData = Partial<CreateSupplierData>
 
 export interface SupplierResponse {
   success: boolean
@@ -26,7 +28,7 @@ export interface SupplierResponse {
 
 export interface SupplierWithProducts {
   supplier: Supplier
-  products: any[]
+  products: Product[]
   totalProducts: number
   totalValue: number
   lowStockProducts: number
