@@ -12,8 +12,13 @@ const customJestConfig = {
     // Manejar alias de módulos
     "^@/(.*)$": "<rootDir>/$1",
   },
+  // Indica a Jest que solo ejecute archivos que terminen en .test.ts o .test.tsx
+  // Esto evita que intente correr los archivos .spec.ts de Playwright.
+  testMatch: ["**/test/**/*.test.ts?(x)"],
+  // Opcional: Añade un archivo de setup para configurar el entorno de pruebas.
+  // Es muy útil para importar jest-dom.
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 }
 
 // createJestConfig se exporta de esta manera para asegurar que next/jest pueda cargar la configuración de Next.js que es asíncrona
 module.exports = createJestConfig(customJestConfig)
-

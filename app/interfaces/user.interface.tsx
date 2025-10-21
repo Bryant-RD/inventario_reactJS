@@ -25,7 +25,5 @@ export interface User {
 export interface AuthResponse {
   success: boolean
   message: string
-  user?: User
-  token?: string
-  access_token?: string
+  access_token: string
 }

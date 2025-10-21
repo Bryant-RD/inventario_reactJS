@@ -1,22 +1,24 @@
 export interface Product {
   id: number
   name: string
+  description: string
   category: string
   stock: number
   minStock: number
-  price: number
+  price: number // Lo convertiremos de string a number en el repositorio
   supplierId: number
   createdAt: string
   updatedAt: string
 }
 
 export interface CreateProductData {
-  name: string
-  category: string
-  stock: number
-  minStock: number
-  price: number
-  supplierId: number
+  nombre: string
+  descripcion: string
+  categoria: string
+  cantidad: number
+  cantidadMinima: number
+  precio: number
+  proveedorId: number
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> {}

@@ -6,8 +6,6 @@ interface ApiResponse<T> {
   success: boolean
   message: string
   data?: T
-  token?: string
-  user?: AuthResponse["user"]
 }
 
 async function request<T>(
@@ -31,15 +29,12 @@ async function request<T>(
       body: body ? JSON.stringify(body) : null,
     })
 
-    console.log(body);
-
-    // Handle cases where the response has no content (e.g., DELETE 204)
-    if (response.status === 204) {
-      return {
-        success: true,
-        message: "Operación exitosa",
-      }
-    }
+    // if (response.status === 201) {
+    //   return {
+    //     success: true,
+    //     message: "Operación exitosa",
+    //   }
+    // }
 
     const data = await response.json()
 
@@ -47,6 +42,7 @@ async function request<T>(
       return {
         success: false,
         message: data.message || `Error en la solicitud ${method} a ${endpoint}`,
+        data: data,
       }
     }
 
@@ -54,9 +50,7 @@ async function request<T>(
     return {
       success: true,
       message: data.message || "Operación exitosa",
-      data: data, // The full response data is returned
-      user: data.user,
-      token: data.access_token || data.token,
+      data: data,
     }
   } catch (error) {
     console.error(`Error en la solicitud ${method} a ${endpoint}:`, error)

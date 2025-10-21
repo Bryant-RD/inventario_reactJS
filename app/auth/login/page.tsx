@@ -49,12 +49,14 @@ export default function LoginPage() {
     setSuccess("")
 
     const result = await UserRepository.login(formData)
+    // alert(result.message);
 
-    if (result.success) {
-      setSuccess("Login successful! Redirecting...")
+      if (result.success) {
+      setError("") // Limpiamos cualquier error anterior
+      setSuccess(result.message || "Login exitoso! Redirigiendo...")
 
       setTimeout(() => {
-        router.push("/")
+        router.push("/products") // Redirigimos a la página de productos
       }, 1500)
     } else {
       setError(result.message)

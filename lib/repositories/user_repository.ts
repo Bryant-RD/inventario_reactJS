@@ -33,9 +33,11 @@ export class UserRepository {
   static async login(credentials: LoginCredentials): Promise<{ success: boolean; message: string }> {
     const response = await ApiUsuarios.login(credentials)
 
+     console.log(`(Response: ${JSON.stringify(response)})`);
 
-    if (response.success && response.user && response.token) {
-      this.saveSession(response.user, response.token)
+
+    if (response.success && response.access_token) {
+      this.saveSession(credentials.email, response.access_token)
       return { success: true, message: "Login exitoso" }
     }
 
@@ -44,9 +46,9 @@ export class UserRepository {
 
   
 
-  private static saveSession(user: User, token: string): void {
+  private static saveSession(email: String, token: string): void {
     if (typeof window === "undefined") return
-    localStorage.setItem(USER_KEY, JSON.stringify(user))
+    localStorage.setItem(USER_KEY, JSON.stringify(email))
     localStorage.setItem(TOKEN_KEY, token)
   }
 
