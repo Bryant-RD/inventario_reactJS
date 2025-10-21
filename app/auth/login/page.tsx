@@ -56,7 +56,7 @@ export default function LoginPage() {
       setSuccess(result.message || "Login exitoso! Redirigiendo...")
 
       setTimeout(() => {
-        router.push("/products") // Redirigimos a la página de productos
+        router.push("/") 
       }, 1500)
     } else {
       setError(result.message)

@@ -8,6 +8,7 @@ import { AlertTriangle, Package, Users, TrendingDown, TrendingUp, LogOut } from 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { UserRepository } from "@/lib/repositories"
 import { AuthGuard } from "@/components/ui/auth-guard"
 
 // Mock data - in a real app, this would come from an API
@@ -39,8 +40,8 @@ function DashboardContent() {
   }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem("user")
-    router.push("/auth/login")
+    UserRepository.clearSession() // Usamos el método del repositorio para limpiar la sesión
+    router.push("/auth/login") // Redirigimos al login
   }
 
   const lowStockProducts = products.filter((product) => product.stock <= product.minStock)

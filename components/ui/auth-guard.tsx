@@ -1,44 +1,62 @@
 "use client"
 
-import type React from "react"
-
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { ApiUsuarios } from "@/lib/api"
+import { Skeleton } from "./skeleton"
 
-interface AuthGuardProps {
-  children: React.ReactNode
-}
-
-export function AuthGuard({ children }: AuthGuardProps) {
+export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isVerified, setIsVerified] = useState(false)
 
   useEffect(() => {
-    const checkAuth = () => {
-      const user = localStorage.getItem("user")
-      if (user) {
-        setIsAuthenticated(true)
-      } else {
+    const verifyToken = async () => {
+      const token = localStorage.getItem("inventory_token")
+
+      if (!token) {
         router.push("/auth/login")
+        return
       }
-      setIsLoading(false)
+
+      try {
+        // Hacemos una llamada ligera a la API para validar el token.
+        // El ApiClient se encargará de redirigir si el token es inválido (401).
+        const response = await ApiUsuarios.getProfile(token)
+        if (response.success) {
+          setIsVerified(true)
+        } else {
+          // Si la API devuelve un error que no es 401, también redirigimos por seguridad.
+          router.push("/auth/login")
+        }
+      } catch (error) {
+        // El interceptor en ApiClient ya debería haber manejado el error 401.
+      }
     }
 
-    checkAuth()
+    verifyToken()
   }, [router])
 
-  if (isLoading) {
+  if (!isVerified) {
+    // Muestra un esqueleto de carga mientras se verifica el token para evitar parpadeos.
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="p-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-1/3" />
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-9 w-32" />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+        </div>
       </div>
     )
   }
 
-  if (!isAuthenticated) {
-    return null
-  }
-
   return <>{children}</>
 }
+

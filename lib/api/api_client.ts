@@ -1,4 +1,5 @@
 import { AuthResponse } from "@/app/interfaces/user.interface"
+import { UserRepository } from "../repositories"
 
 const API_BASE_URL = "/api"
 
@@ -29,12 +30,16 @@ async function request<T>(
       body: body ? JSON.stringify(body) : null,
     })
 
-    // if (response.status === 201) {
-    //   return {
-    //     success: true,
-    //     message: "Operación exitosa",
-    //   }
-    // }
+    // Manejo centralizado de errores de autenticación (token expirado/inválido)
+    if (response.status === 401) {
+      UserRepository.clearSession() // Borramos el token y usuario del localStorage
+      // Redirigimos a la página de login. Usamos window.location para forzar un refresco completo.
+      if (typeof window !== "undefined") {
+        window.location.href = "/auth/login"
+      }
+      // Devolvemos una promesa que nunca se resuelve para detener la ejecución del código que llamó a la API.
+      return new Promise(() => {})
+    }
 
     const data = await response.json()
 

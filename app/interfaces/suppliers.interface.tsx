@@ -3,6 +3,7 @@ export interface Supplier {
   name: string
   contact: string
   phone?: string
+  email?: string
   address?: string
   createdAt: string
   updatedAt: string
