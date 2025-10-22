@@ -59,17 +59,17 @@ export class ProductRepository {
    * Obtiene un producto por su ID.
    * @param productId - El ID del producto.
    */
-  static async getProductById(productId: number) {
+  static async getProductById(productId: number) : Promise<ProductResponse> {
     const { token, error } = this.getTokenOrError()
     if (error) return error
-    return ApiProductos.getProductById(token!, productId)
+    return await ApiProductos.getProductById(token!, productId)
   }
 
   /**
    * Crea un nuevo producto.
    * @param productData - Los datos del producto a crear.
    */
-  static async createProduct(productData: CreateProductData) {
+  static async createProduct(productData: CreateProductData): Promise<ProductResponse> {
     const { token, error } = this.getTokenOrError()
     if (error) return error
     return ApiProductos.createProduct(token!, productData)
@@ -80,7 +80,7 @@ export class ProductRepository {
    * @param productId - El ID del producto a actualizar.
    * @param productData - Los nuevos datos del producto.
    */
-  static async updateProduct(productId: number, productData: UpdateProductData) {
+  static async updateProduct(productId: number, productData: UpdateProductData) : Promise<ProductResponse> {
     const { token, error } = this.getTokenOrError()
     if (error) return error
     return ApiProductos.updateProduct(token!, productId, productData)

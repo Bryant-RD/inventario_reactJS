@@ -7,6 +7,6 @@ import { defineConfig } from 'next/experimental/testmode/playwright';
  */
 export default defineConfig({webServer: {
   command: "npm run build && npm start",
-  port: 3000,
+  port: 4000,
   timeout: 60000,
 }});

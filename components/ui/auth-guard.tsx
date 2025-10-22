@@ -28,7 +28,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           // Si la API devuelve un error que no es 401, también redirigimos por seguridad.
           router.push("/auth/login")
         }
-      } catch (error) {
+      } catch {
         // El interceptor en ApiClient ya debería haber manejado el error 401.
       }
     }
@@ -59,4 +59,3 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>
 }
-

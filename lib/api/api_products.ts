@@ -1,6 +1,5 @@
 import { CreateProductData, Product, ProductResponse, UpdateProductData } from "@/app/interfaces/products.interface"
 import { ApiClient } from "./api_client"
-import { json } from "stream/consumers"
 
 export class ApiProductos {
   // Obtener todos los productos

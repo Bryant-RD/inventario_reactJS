@@ -1,4 +1,3 @@
-import { AuthResponse } from "@/app/interfaces/user.interface"
 import { UserRepository } from "../repositories"
 
 const API_BASE_URL = "/api"

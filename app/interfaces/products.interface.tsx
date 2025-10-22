@@ -11,6 +11,22 @@ export interface Product {
   updatedAt: string
 }
 
+/**
+ * Representa la estructura de un producto tal como viene de la API (backend).
+ */
+export interface ApiProduct {
+  id: number
+  nombre: string
+  descripcion: string
+  categoria: string
+  cantidad: number
+  cantidadMinima: number
+  precio: string
+  proveedorId: number
+  fechaCreacion: string
+  fechaActualizacion: string
+}
+
 export interface CreateProductData {
   nombre: string
   descripcion: string
@@ -21,7 +37,7 @@ export interface CreateProductData {
   proveedorId: number
 }
 
-export interface UpdateProductData extends Partial<CreateProductData> {}
+export type UpdateProductData = Partial<CreateProductData>
 
 export interface ProductResponse {
   success: boolean

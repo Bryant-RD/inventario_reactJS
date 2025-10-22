@@ -2,10 +2,8 @@ import { ApiUsuarios } from "../lib/api/api_users"
 import { ApiClient } from "../lib/api/api_client"
 import { User, CreateUserDTO } from "@/app/interfaces/user.interface"
 
-// Mockear el ApiClient para evitar llamadas de red reales
+// Mock del ApiClient
 jest.mock("../lib/api/api_client")
-
-// Castear el mock para tener tipado y autocompletado
 const mockedApiClient = ApiClient as jest.Mocked<typeof ApiClient>
 
 describe("ApiUsuarios", () => {
@@ -19,29 +17,37 @@ describe("ApiUsuarios", () => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
+
   const mockToken = "test-token"
 
-  // Limpiar los mocks después de cada prueba para asegurar que los tests son independientes
   afterEach(() => {
     jest.clearAllMocks()
   })
 
   describe("login", () => {
-    it("debería llamar a ApiClient.post con las credenciales correctas y devolver la respuesta", async () => {
+    it("debería llamar a ApiClient.post con las credenciales correctas y devolver la respuesta formateada", async () => {
       const credentials = { email: "test@example.com", password: "password123" }
-      const mockResponse = { success: true, user: mockUser, token: mockToken, message: "Login exitoso" }
+      const mockApiResponse = {
+        success: true,
+        message: "Login exitoso",
+        data: { access_token: mockToken },
+      }
 
-      mockedApiClient.post.mockResolvedValue(mockResponse)
+      mockedApiClient.post.mockResolvedValue(mockApiResponse)
 
       const result = await ApiUsuarios.login(credentials)
 
       expect(mockedApiClient.post).toHaveBeenCalledWith("/auth/login", credentials)
-      expect(result).toEqual(mockResponse)
+      expect(result).toEqual({
+        success: true,
+        message: "Login exitoso",
+        access_token: mockToken,
+      })
     })
   })
 
   describe("register", () => {
-    it("debería llamar a ApiClient.post con los datos de registro y devolver la respuesta", async () => {
+    it("debería llamar a ApiClient.post con los datos de registro y devolver la respuesta formateada", async () => {
       const registerData: CreateUserDTO = {
         firstName: "Jane",
         lastName: "Doe",
@@ -49,37 +55,57 @@ describe("ApiUsuarios", () => {
         password: "password123",
         company: "Test Corp",
       }
-      const mockResponse = { success: true, message: "Registro exitoso" }
 
-      mockedApiClient.post.mockResolvedValue(mockResponse)
+      const mockApiResponse = {
+        success: true,
+        message: "Registro exitoso",
+        data: { access_token: "" },
+      }
+
+      mockedApiClient.post.mockResolvedValue(mockApiResponse)
 
       const result = await ApiUsuarios.register(registerData)
 
       expect(mockedApiClient.post).toHaveBeenCalledWith("/auth/register", registerData)
-      expect(result).toEqual(mockResponse)
+      expect(result).toEqual({
+        success: true,
+        message: "Registro exitoso",
+        access_token: "",
+      })
     })
   })
 
   describe("getProfile", () => {
-    it("debería llamar a ApiClient.get con el token y formatear la respuesta", async () => {
-      const mockApiResponse = { success: true, data: mockUser, message: "Perfil obtenido" }
+    it("debería llamar a ApiClient.get con el token y devolver el perfil correctamente", async () => {
+      const mockApiResponse = {
+        success: true,
+        message: "Perfil obtenido",
+        data: mockUser,
+      }
+
       mockedApiClient.get.mockResolvedValue(mockApiResponse)
 
       const result = await ApiUsuarios.getProfile(mockToken)
 
       expect(mockedApiClient.get).toHaveBeenCalledWith("/auth/profile", mockToken)
       expect(result).toEqual({
-        ...mockApiResponse,
+        success: true,
+        message: "Perfil obtenido",
         user: mockUser,
+        data: mockUser, // se conserva porque el método usa spread {...response}
       })
     })
   })
 
   describe("updateProfile", () => {
-    it("debería llamar a ApiClient.patch con el token y los datos a actualizar", async () => {
+    it("debería llamar a ApiClient.patch con los datos y el token, devolviendo el usuario actualizado", async () => {
       const updateData = { firstName: "Johnny" }
       const updatedUser = { ...mockUser, ...updateData }
-      const mockApiResponse = { success: true, data: updatedUser, message: "Perfil actualizado" }
+      const mockApiResponse = {
+        success: true,
+        message: "Perfil actualizado",
+        data: updatedUser,
+      }
 
       mockedApiClient.patch.mockResolvedValue(mockApiResponse)
 
@@ -87,16 +113,22 @@ describe("ApiUsuarios", () => {
 
       expect(mockedApiClient.patch).toHaveBeenCalledWith("/auth/profile", updateData, mockToken)
       expect(result).toEqual({
-        ...mockApiResponse,
+        success: true,
+        message: "Perfil actualizado",
         user: updatedUser,
+        data: updatedUser,
       })
     })
   })
 
   describe("getAllUsers", () => {
-    it("debería llamar a ApiClient.get y devolver una lista de usuarios", async () => {
+    it("debería llamar a ApiClient.get y devolver la lista de usuarios", async () => {
       const mockUsers = [mockUser, { ...mockUser, id: 2, email: "jane.doe@example.com" }]
-      const mockApiResponse = { success: true, data: mockUsers, message: "Usuarios obtenidos" }
+      const mockApiResponse = {
+        success: true,
+        message: "Usuarios obtenidos",
+        data: mockUsers,
+      }
 
       mockedApiClient.get.mockResolvedValue(mockApiResponse)
 
@@ -104,14 +136,16 @@ describe("ApiUsuarios", () => {
 
       expect(mockedApiClient.get).toHaveBeenCalledWith("/users", mockToken)
       expect(result).toEqual({
-        ...mockApiResponse,
+        success: true,
+        message: "Usuarios obtenidos",
+        data: mockUsers,
         users: mockUsers,
       })
     })
   })
 
   describe("deleteUser", () => {
-    it("debería llamar a ApiClient.delete con el ID de usuario y el token", async () => {
+    it("debería llamar a ApiClient.delete con el ID y token correctos", async () => {
       const userId = 1
       const mockResponse = { success: true, message: "Usuario eliminado" }
 

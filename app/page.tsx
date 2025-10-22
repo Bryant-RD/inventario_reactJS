@@ -10,6 +10,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { UserRepository } from "@/lib/repositories"
 import { AuthGuard } from "@/components/ui/auth-guard"
+import { User } from "@/app/interfaces/user.interface"
 
 // Mock data - in a real app, this would come from an API
 const mockProducts = [
@@ -30,12 +31,12 @@ function DashboardContent() {
   const router = useRouter()
   const [products] = useState(mockProducts)
   const [suppliers] = useState(mockSuppliers)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      setUser(JSON.parse(userData))
+    const currentUser = UserRepository.getUser()
+    if (currentUser) {
+      setUser(currentUser)
     }
   }, [])
 
@@ -55,7 +56,7 @@ function DashboardContent() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Welcome back, {user?.firstName || user?.name || "User"}!
+              Welcome back, {user?.firstName || user?.lastName || "User"}!
             </h1>
             <p className="text-muted-foreground">Manage your stock and suppliers efficiently</p>
           </div>

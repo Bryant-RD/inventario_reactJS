@@ -82,8 +82,9 @@ export default function SignUpPage() {
     setIsLoading(true)
     setError("")
 
-    // Excluimos confirmPassword ya que no se envía al backend
-    const { confirmPassword, ...registrationData } = formData
+    // Creamos una copia de los datos y eliminamos `confirmPassword` para no enviarlo al backend.
+    const registrationData = { ...formData }
+    delete (registrationData as Partial<typeof registrationData>).confirmPassword
 
     try {
       // Llamamos al método del repositorio para registrar al usuario
@@ -100,8 +101,12 @@ export default function SignUpPage() {
         // Mostramos el mensaje de error que viene de la API
         setError(result.message)
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.")
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("An unexpected error occurred. Please try again.")
+      }
     }
 
     setIsLoading(false)

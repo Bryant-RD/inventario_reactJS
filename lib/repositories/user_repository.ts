@@ -33,7 +33,7 @@ export class UserRepository {
   static async login(credentials: LoginCredentials): Promise<{ success: boolean; message: string }> {
     const response = await ApiUsuarios.login(credentials)
 
-     console.log(`(Response: ${JSON.stringify(response)})`);
+    //  console.log(`(Response: ${JSON.stringify(response)})`);
 
 
     if (response.success && response.access_token) {
@@ -46,7 +46,7 @@ export class UserRepository {
 
   
 
-  private static saveSession(email: String, token: string): void {
+  private static saveSession(email: string, token: string): void {
     if (typeof window === "undefined") return
     localStorage.setItem(USER_KEY, JSON.stringify(email))
     localStorage.setItem(TOKEN_KEY, token)

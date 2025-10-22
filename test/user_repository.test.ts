@@ -1,6 +1,6 @@
 import { UserRepository } from "@/lib/repositories"
 import { ApiUsuarios } from "@/lib/api"
-import { User } from "@/app/interfaces/user.interface"
+import { User, LoginCredentials } from "@/app/interfaces/user.interface"
 
 // Mockear el módulo de la API para no hacer llamadas reales durante las pruebas
 jest.mock("@/lib/api")
@@ -36,7 +36,7 @@ describe("UserRepository", () => {
     role: "user",
     createdAt: "",
     updatedAt: ""
-  }
+  } as User
   const mockToken = "test-token"
 
   beforeEach(() => {
@@ -84,45 +84,88 @@ describe("UserRepository", () => {
     })
   })
 
-  describe("login", () => {
-    it("debería guardar la sesión y devolver éxito en un login correcto", async () => {
-      ;(ApiUsuarios.login as jest.Mock).mockResolvedValue({
-        success: true,
-        user: mockUser,
-        token: mockToken,
-      })
+describe("login", () => {
+  const mockUser = {
+    id: 1,
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    company: "Test Inc.",
+    role: "user",
+    createdAt: "",
+    updatedAt: "",
+  }
 
-      const setItemSpy = jest.spyOn(window.localStorage, "setItem")
+  const mockToken = "test-token"
 
-      const result = await UserRepository.login({
-        email: "john.doe@example.com",
-        password: "password123",
-      })
-
-      expect(result.success).toBe(true)
-      expect(result.message).toBe("Login exitoso")
-      expect(setItemSpy).toHaveBeenCalledWith("inventory_user", JSON.stringify(mockUser))
-      expect(setItemSpy).toHaveBeenCalledWith("inventory_token", mockToken)
-    })
-
-    it("debería devolver error si el login de la API falla", async () => {
-      ;(ApiUsuarios.login as jest.Mock).mockResolvedValue({
-        success: false,
-        message: "Credenciales incorrectas.",
-      })
-
-      const setItemSpy = jest.spyOn(window.localStorage, "setItem")
-
-      const result = await UserRepository.login({
-        email: "john.doe@example.com",
-        password: "wrong-password",
-      })
-
-      expect(result.success).toBe(false)
-      expect(result.message).toBe("Credenciales incorrectas.")
-      expect(setItemSpy).not.toHaveBeenCalled()
+  beforeAll(() => {
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        store: {} as Record<string, string>,
+        getItem(key: string) {
+          return this.store[key] || null
+        },
+        setItem(key: string, value: string) {
+          this.store[key] = value
+        },
+        removeItem(key: string) {
+          delete this.store[key]
+        },
+        clear() {
+          this.store = {}
+        },
+      },
+      writable: true,
     })
   })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    window.localStorage.clear()
+  })
+
+  it("debería guardar la sesión y devolver éxito en un login correcto", async () => {
+    ;(ApiUsuarios.login as jest.Mock).mockResolvedValue({
+      success: true,
+      user: mockUser,
+      message: "Login exitoso",
+      token: mockToken,
+      access_token: mockToken,
+    })
+
+    const setItemSpy = jest.spyOn(window.localStorage, "setItem")
+
+    const result = await UserRepository.login({
+      email: mockUser.email,
+      password: "password123",
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.message).toBe("Login exitoso")
+    expect(setItemSpy).toHaveBeenCalledWith("inventory_user", JSON.stringify(mockUser.email))
+    expect(setItemSpy).toHaveBeenCalledWith("inventory_token", mockToken)
+  })
+
+  it("debería devolver error si el login de la API falla", async () => {
+    ;(ApiUsuarios.login as jest.Mock).mockResolvedValue({
+      success: false,
+      message: "Credenciales incorrectas.",
+    })
+
+    const setItemSpy = jest.spyOn(window.localStorage, "setItem")
+
+    const result = await UserRepository.login({
+      email: "john.doe@example.com",
+      password: "wrong-password",
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe("Credenciales incorrectas.")
+    expect(setItemSpy).not.toHaveBeenCalled()
+  })
+})
+
+
 
   describe("Gestión de Sesión (localStorage)", () => {
     it("getUser debería devolver el usuario parseado desde localStorage", () => {
