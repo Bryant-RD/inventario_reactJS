@@ -30,8 +30,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Label } from "@radix-ui/react-label"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 
 export default function ProductsPage() {
@@ -45,11 +51,12 @@ export default function ProductsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [productForm, setProductForm] = useState({
     name: "",
+    description: "", // Added description field
+    category: "",
     stock: "",
     minStock: "",
     price: "",
     supplierId: "",
-    category: "",
   })
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -57,7 +64,15 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("")
 
   const resetForm = () => {
-    setProductForm({ name: "", stock: "", minStock: "", price: "", supplierId: "", category: "" })
+    setProductForm({
+      name: "",
+      description: "",
+      stock: "",
+      minStock: "",
+      price: "",
+      supplierId: "",
+      category: "",
+    })
     setFormError("")
   }
 
@@ -76,18 +91,13 @@ export default function ProductsPage() {
       cantidadMinima: Number.parseInt(productForm.minStock) || 0,
       proveedorId: Number.parseInt(productForm.supplierId),
       categoria: productForm.category || "General",
-      descripcion: "",
+      descripcion: productForm.description,
     }
 
     const result = await ProductRepository.createProduct(newProductData)
 
     if (result.success && result.product) {
-      // Para evitar otra llamada a la API, mapeamos la respuesta al formato del frontend
-      const newProduct = {
-        ...result.product,
-        price: Number(result.product.price), // Asegurar que el precio es un número
-      }
-      setProducts([...products, newProduct])
+      setProducts([...products, result.product])
       setIsAddDialogOpen(false)
       resetForm()
     } else {
@@ -109,6 +119,7 @@ export default function ProductsPage() {
       cantidad: Number.parseInt(productForm.stock),
       precio: Number.parseFloat(productForm.price),
       cantidadMinima: Number.parseInt(productForm.minStock) || 0,
+      descripcion: productForm.description,
       proveedorId: Number.parseInt(productForm.supplierId),
       categoria: productForm.category || "General",
     }
@@ -116,11 +127,7 @@ export default function ProductsPage() {
     const result = await ProductRepository.updateProduct(editingProduct.id, updatedData)
 
     if (result.success && result.product) {
-      const updatedProduct = {
-        ...result.product,
-        price: Number(result.product.price),
-      }
-      setProducts(products.map((p) => (p.id === editingProduct.id ? updatedProduct : p)))
+      setProducts(products.map((p) => (p.id === editingProduct.id ? result.product! : p)))
       setIsEditDialogOpen(false)
       setEditingProduct(null)
       resetForm()
@@ -170,6 +177,7 @@ export default function ProductsPage() {
     setEditingProduct(product)
     setProductForm({
       name: product.name,
+      description: product.description,
       stock: product.stock.toString(),
       minStock: (product.minStock || "").toString(),
       price: product.price.toString(),
@@ -187,8 +195,16 @@ export default function ProductsPage() {
     )
   }
 
-   const handleDeleteProduct = (productId: number) => {
-    setProducts(products.filter((product) => product.id !== productId))
+   const handleDeleteProduct = async (productId: number) => {
+    // Opcional: Añadir un estado de "eliminando" para deshabilitar el botón
+    const result = await ProductRepository.deleteProduct(productId)
+
+    if (result.success) {
+      setProducts(products.filter((product) => product.id !== productId))
+    } else {
+      // Mostrar un error si no se pudo eliminar
+      setError(result.message || "No se pudo eliminar el producto.")
+    }
   }
 
   if (isLoading) {
@@ -312,6 +328,15 @@ export default function ProductsPage() {
                   />
                 </div>
                 <div className="grid gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description" // Changed id to description
+                    value={productForm.description} // Changed value to productForm.description
+                    onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} // Changed onChange to update description
+                    placeholder="Enter product description" // Changed placeholder
+                  />
+                </div>
+                <div className="grid gap-2">
                   <Label htmlFor="category">Category</Label>
                   <Input
                     id="category"
@@ -406,6 +431,16 @@ export default function ProductsPage() {
                     />
                   </div>
                 </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Input
+                    id="edit-description"
+                    value={productForm.description}
+                    onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                    placeholder="Enter product description"
+                  />
+                </div>
+
                 <div className="grid gap-2">
                   <Label htmlFor="edit-price">Price</Label>
                   <Input

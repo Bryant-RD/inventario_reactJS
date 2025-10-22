@@ -71,8 +71,14 @@ export class ProductRepository {
    */
   static async createProduct(productData: CreateProductData): Promise<ProductResponse> {
     const { token, error } = this.getTokenOrError()
-    if (error) return error
-    return ApiProductos.createProduct(token!, productData)
+    if (error) return error;
+    const apiResult = await ApiProductos.createProduct(token!, productData);
+
+    if (apiResult.success && apiResult.product) {
+      apiResult.product = this.mapApiProductToProduct(apiResult.product);
+    }
+
+    return apiResult;
   }
 
   /**
@@ -82,8 +88,14 @@ export class ProductRepository {
    */
   static async updateProduct(productId: number, productData: UpdateProductData) : Promise<ProductResponse> {
     const { token, error } = this.getTokenOrError()
-    if (error) return error
-    return ApiProductos.updateProduct(token!, productId, productData)
+    if (error) return error;
+    const apiResult = await ApiProductos.updateProduct(token!, productId, productData);
+
+    if (apiResult.success && apiResult.product) {
+      apiResult.product = this.mapApiProductToProduct(apiResult.product);
+    }
+
+    return apiResult;
   }
 
   /**
