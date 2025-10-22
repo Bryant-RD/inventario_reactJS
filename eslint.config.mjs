@@ -16,7 +16,6 @@ const eslintConfig = [
     // Idealmente, estas deberían ser corregidas en el futuro.
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
-      // "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
     },
   },
 ];

@@ -173,7 +173,7 @@ export default function SignUpPage() {
 
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email">Username</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   name="username"
