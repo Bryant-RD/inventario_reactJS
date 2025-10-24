@@ -1,5 +1,5 @@
 import { ApiUsuarios } from "../api"
-import { LoginCredentials, CreateUserDTO, User } from "@/app/interfaces/user.interface"
+import { LoginCredentials, CreateUserDTO, User, LoginResponse } from "@/app/interfaces/user.interface"
 
 const USER_KEY = "inventory_user"
 const TOKEN_KEY = "inventory_token"
@@ -30,23 +30,22 @@ export class UserRepository {
    * @param credentials - Email y contraseña del usuario.
    * @returns Un objeto indicando si el login fue exitoso y un mensaje.
    */
-  static async login(credentials: LoginCredentials): Promise<{ success: boolean; message: string }> {
+  static async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await ApiUsuarios.login(credentials)
 
     //  console.log(`(Response: ${JSON.stringify(response)})`);
 
 
     if (response.success && response.access_token) {
-      this.saveSession(credentials.email, response.access_token)
-      return { success: true, message: "Login exitoso" }
+      this.saveSession(response.user!, response.access_token)
     }
 
-    return { success: false, message: response.message || "Error desconocido durante el login." }
+    return response
   }
 
   
 
-  private static saveSession(email: string, token: string): void {
+  private static saveSession(email: User, token: string): void {
     if (typeof window === "undefined") return
     localStorage.setItem(USER_KEY, JSON.stringify(email))
     localStorage.setItem(TOKEN_KEY, token)

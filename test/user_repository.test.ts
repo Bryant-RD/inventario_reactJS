@@ -127,22 +127,22 @@ describe("login", () => {
   it("debería guardar la sesión y devolver éxito en un login correcto", async () => {
     ;(ApiUsuarios.login as jest.Mock).mockResolvedValue({
       success: true,
-      user: mockUser,
       message: "Login exitoso",
-      token: mockToken,
       access_token: mockToken,
+      user: mockUser,
     })
 
     const setItemSpy = jest.spyOn(window.localStorage, "setItem")
 
     const result = await UserRepository.login({
-      email: mockUser.email,
+      user: mockUser,
       password: "password123",
     })
 
     expect(result.success).toBe(true)
     expect(result.message).toBe("Login exitoso")
-    expect(setItemSpy).toHaveBeenCalledWith("inventory_user", JSON.stringify(mockUser.email))
+    // Verificamos que se guarde el OBJETO de usuario completo, no solo el email.
+    expect(setItemSpy).toHaveBeenCalledWith("inventory_user", JSON.stringify(mockUser))
     expect(setItemSpy).toHaveBeenCalledWith("inventory_token", mockToken)
   })
 
@@ -155,7 +155,7 @@ describe("login", () => {
     const setItemSpy = jest.spyOn(window.localStorage, "setItem")
 
     const result = await UserRepository.login({
-      email: "john.doe@example.com",
+      user: mockUser,
       password: "wrong-password",
     })
 

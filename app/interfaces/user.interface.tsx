@@ -27,3 +27,10 @@ export interface AuthResponse {
   message: string
   access_token: string
 }
+
+export interface LoginResponse {
+  success: boolean
+  message: string
+  access_token: string
+  user?: User
+}

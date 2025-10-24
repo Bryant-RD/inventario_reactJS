@@ -1,19 +1,19 @@
-import { AuthResponse, LoginCredentials, CreateUserDTO, User } from "@/app/interfaces/user.interface"
+import { AuthResponse, LoginCredentials, CreateUserDTO, User, LoginResponse } from "@/app/interfaces/user.interface"
 import { ApiClient } from "../api/api_client"
 
 // Servicio para manejar todas las operaciones relacionadas con usuarios y autenticación
 export class ApiUsuarios {
   // Login de usuario
-  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await  ApiClient.post<AuthResponse>("/auth/login", credentials);
-        // Log para ver la URL final a la que se hizo la petición y su estado
-   
+  static async login(credentials: LoginCredentials): Promise<LoginResponse> {
+    // El tipo genérico ahora es el contenido de 'data' en la respuesta de la API
+    const response = await ApiClient.post<{ access_token: string; user: User }>("/auth/login", credentials)
 
     return {
       success: response.success,
       message: response.message,
       access_token: response.data!.access_token!,
-    };
+      user: response.data!.user,
+    }
   }
 
   // Registro de usuario
