@@ -34,7 +34,7 @@ export class ApiProductos {
     productId: number,
     productData: UpdateProductData,
   ): Promise<ProductResponse> {
-    const response = await ApiClient.put<Product>(`/productos/${productId}`, productData, token)
+    const response = await ApiClient.patch<Product>(`/productos/${productId}`, productData, token)
     return { ...response, product: response.data }
   }
 
