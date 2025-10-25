@@ -23,31 +23,47 @@ export class UserRepository {
     return { success: false, message: response.message || "Error desconocido durante el registro." };
   }
 
-
-  
   /**
    * Realiza el proceso de login, llamando a la API y guardando la sesión si es exitoso.
    * @param credentials - Email y contraseña del usuario.
    * @returns Un objeto indicando si el login fue exitoso y un mensaje.
    */
   static async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await ApiUsuarios.login(credentials)
+    const apiResponse = await ApiUsuarios.login(credentials)
 
-    //  console.log(`(Response: ${JSON.stringify(response)})`);
-
-
-    if (response.success && response.access_token) {
-      this.saveSession(response.user!, response.access_token)
+    if (apiResponse.success && apiResponse.access_token && apiResponse.user) {
+      // 1. Mapeamos el usuario de la API a nuestra interfaz de frontend
+      const frontendUser = this.mapApiUserToUser(apiResponse.user)
+      // 2. Guardamos el usuario ya mapeado y el token en la sesión
+      this.saveSession(frontendUser, apiResponse.access_token)
+      // 3. Devolvemos el usuario mapeado en la respuesta del repositorio
+      return { ...apiResponse, user: frontendUser }
     }
 
-    return response
+    return apiResponse
   }
 
-  
+  /**
+   * Mapea los datos de un usuario de la API a la interfaz `User` del frontend.
+   * @param apiUser - El objeto de usuario tal como viene de la API.
+   * @returns Un objeto `User` con los nombres de propiedad del frontend.
+   */
+  private static mapApiUserToUser(apiUser: any): User {
+    return {
+      id: apiUser.id,
+      firstName: apiUser.nombre, // Mapeo de 'nombre' a 'firstName'
+      lastName: apiUser.apellido, // Mapeo de 'apellido' a 'lastName'
+      email: apiUser.correo, // Mapeo de 'correo' a 'email'
+      company: apiUser.empresa, // Mapeo de 'empresa' a 'company'
+      role: apiUser.role,
+      createdAt: apiUser.fechaCreacion, // Mapeo de 'fechaCreacion' a 'createdAt'
+      updatedAt: apiUser.fechaActualizacion, // Mapeo de 'fechaActualizacion' a 'updatedAt'
+    }
+  }
 
-  private static saveSession(email: User, token: string): void {
+  private static saveSession(user: User, token: string): void {
     if (typeof window === "undefined") return
-    localStorage.setItem(USER_KEY, JSON.stringify(email))
+    localStorage.setItem(USER_KEY, JSON.stringify(user))
     localStorage.setItem(TOKEN_KEY, token)
   }
 
