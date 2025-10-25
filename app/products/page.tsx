@@ -139,13 +139,6 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      // Proteger la ruta: si no hay token, redirigir al login
-      const token = UserRepository.getToken()
-      if (!token) {
-        router.push("/auth/login")
-        return
-      }
-
       try {
         // Cargar productos y proveedores en paralelo
         const [productsResult, suppliersResult] = await Promise.all([

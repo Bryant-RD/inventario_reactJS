@@ -1,42 +1,48 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { ApiUsuarios } from "@/lib/api"
+import { usePathname, useRouter } from "next/navigation"
+import { UserRepository } from "@/lib/repositories"
 import { Skeleton } from "./skeleton"
+import { Alert, AlertDescription } from "./alert"
+import { AlertCircle } from "lucide-react"
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const [isVerified, setIsVerified] = useState(false)
+  const pathname = usePathname()
+  const [status, setStatus] = useState<"loading" | "success" | "unauthorized">("loading")
 
   useEffect(() => {
-    const verifyToken = async () => {
-      const token = localStorage.getItem("inventory_token")
+    // No proteger las rutas de autenticación
+    if (pathname.startsWith("/auth")) {
+      setStatus("success")
+      return
+    }
 
+    const verifyAccess = () => {
+      const token = UserRepository.getToken()
       if (!token) {
         router.push("/auth/login")
         return
       }
 
-      try {
-        // Hacemos una llamada ligera a la API para validar el token.
-        // El ApiClient se encargará de redirigir si el token es inválido (401).
-        const response = await ApiUsuarios.getProfile(token)
-        if (response.success) {
-          setIsVerified(true)
-        } else {
-          // Si la API devuelve un error que no es 401, también redirigimos por seguridad.
-          router.push("/auth/login")
-        }
-      } catch {
-        // El interceptor en ApiClient ya debería haber manejado el error 401.
+      const user = UserRepository.getUser()
+      // Rutas que requieren rol de 'admin'
+      const adminRoutes = ["/suppliers"]
+
+      if (user && user.role !== "admin" && adminRoutes.some((route) => pathname.startsWith(route))) {
+        setStatus("unauthorized")
+        return
       }
+
+      // Si todo está bien, permitimos el acceso
+      setStatus("success")
     }
 
-    verifyToken()
-  }, [router])
+    verifyAccess()
+  }, [pathname, router])
 
-  if (!isVerified) {
+  if (status === "loading") {
     // Muestra un esqueleto de carga mientras se verifica el token para evitar parpadeos.
     return (
       <div className="p-8 space-y-6">
@@ -53,6 +59,17 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           <Skeleton className="h-28 w-full" />
           <Skeleton className="h-28 w-full" />
         </div>
+      </div>
+    )
+  }
+
+  if (status === "unauthorized") {
+    return (
+      <div className="p-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>No tienes permiso para acceder a este recurso.</AlertDescription>
+        </Alert>
       </div>
     )
   }

@@ -43,11 +43,30 @@ test.describe("Flujo de Autenticación y Navegación", () => {
 
     // --- 3. Navegación por la Aplicación ---
     await test.step("Navegación a Productos y Proveedores", async () => {
-      await page.getByRole("button", { name: "Manage Products" }).click()
-      await expect(page.getByRole("heading", { name: "Lista de Productos" })).toBeVisible()
+      await page.getByRole("link", { name: "Manage Products" }).click()
+      await expect(page.getByRole("heading", { name: "Products" })).toBeVisible()
 
-      await page.getByRole("button", { name: "Manage Suppliers" }).click()
-      await expect(page.getByRole("heading", { name: "Lista de Proveedores" })).toBeVisible()
+      // Volver al dashboard para poder navegar a los proveedores
+      await page.getByRole("link", { name: "Back to Dashboard" }).click()
+      await page.waitForURL("/")
+
+      await page.getByRole("link", { name: "Manage Suppliers" }).click()
+      // Verificamos que el usuario (con rol de cliente) no tiene permisos
+      // Esperar redirección o mensaje
+      await Promise.race([
+      expect(page.getByText("No tienes permiso para acceder a este recurso.")).toBeVisible({ timeout: 5000 }),
+      page.waitForURL("**/auth/login", { timeout: 5000 }),
+      page.waitForURL("**/", { timeout: 5000 }),
+            ])
+
+      console.log("Final URL:", await page.url())
+
+      const errorLocator = page.getByText(/(permiso|autorizado|forbidden|acceso)/i)
+      await expect(errorLocator).toBeVisible({ timeout: 5000 })
+
+      // Volvemos al dashboard para continuar con la prueba
+      await page.goto("/")
+      await page.waitForURL("/")
     })
 
     // --- 4. Cierre de Sesión ---
