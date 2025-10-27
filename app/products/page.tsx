@@ -339,22 +339,22 @@ export default function ProductsPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="supplier">Supplier</Label>
-                  <Select
-                    value={productForm.supplierId}
-                    onValueChange={(value) => setProductForm({ ...productForm, supplierId: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select supplier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {suppliers.map((supplier) => (
-                        <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                          {supplier.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <Label id="supplier-label" htmlFor="supplier-trigger">Supplier</Label>
+                <Select
+                  value={productForm.supplierId}
+                  onValueChange={(value) => setProductForm({ ...productForm, supplierId: value })}
+                >
+                  <SelectTrigger id="supplier-trigger" aria-labelledby="supplier-label">
+                    <SelectValue placeholder="Select supplier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id.toString()}>
+                        {supplier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 </div>
               </div>
               <DialogFooter>
@@ -365,7 +365,7 @@ export default function ProductsPage() {
                   disabled={isSaving}>
                   Cancel
                 </Button>
-                <Button onClick={handleAddProduct} className="cursor-pointer" disabled={isSaving}>
+                <Button id="save-product" onClick={handleAddProduct} className="cursor-pointer" disabled={isSaving}>
                   {isSaving ? "Adding..." : "Add Product"}
                 </Button>
               </DialogFooter>
@@ -483,7 +483,8 @@ export default function ProductsPage() {
                   disabled={isSaving}>
                   Cancel
                 </Button>
-                <Button onClick={handleUpdateProduct} className="cursor-pointer" disabled={isSaving}>
+                <Button id="update-product"
+                  onClick={handleUpdateProduct} className="cursor-pointer" disabled={isSaving}>
                   {isSaving ? "Updating..." : "Update Product"}
                 </Button>
               </DialogFooter>
@@ -553,6 +554,7 @@ export default function ProductsPage() {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
+                            id={`edit-button-${product.id}`}
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditClick(product)}
@@ -560,7 +562,9 @@ export default function ProductsPage() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+
                           <Button
+                            id={`delete-button-${product.id}`}
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteProduct(product.id)}
